@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 export default function Home() {
   // each box
   const [boxes, setBoxes] = useState(['', '', '', '', '', '', '', '', '']);
@@ -19,7 +19,7 @@ export default function Home() {
     }
   };
 
-  function checkForWin(symbol: string) {
+  const checkForWin = (symbol: string) => {
     const winningSets = [
       [0, 1, 2],
       [3, 4, 5],
@@ -33,55 +33,76 @@ export default function Home() {
 
     for (let set of winningSets) {
       const [a, b, c] = set;
-      if (
-        (boxes[a] === 'O' && boxes[b] === 'O' && boxes[c] === 'O') ||
-        (boxes[a] === 'X' && boxes[b] === 'X' && boxes[c] === 'X')
-      ) {
+      if (boxes[a] === symbol && boxes[b] === symbol && boxes[c] === symbol) {
         setIsOver(true);
       }
     }
-
-    return setIsOver(false);
-  }
+  };
 
   const clickRestart = () => {
     const newArray = ['', '', '', '', '', '', '', '', ''];
     setBoxes(newArray);
+    setIsOver(false);
   };
 
-  return (
-    <div className='flex flex-col items-center'>
-      <h1>TICTACTOE</h1>
-      {!isOver}
+  useEffect(() => {
+    checkForWin(player === 'O' ? 'X' : 'O');
+  }, [player]);
 
-      <table className='border-spacing-0 border-collapse w-[500px] h-[500px]'>
-        <tr>
+  return (
+    <div className='flex flex-col items-center h-full mb-12'>
+      <h1 className='text-5xl font-bold m-6'>TICTACTOE</h1>
+      {isOver && (
+        <>
+          <h1 className='m-4 text-2xl font-semibold border-2 border-gray-400 py-4 px-8 shadow-2xl animate-bounce '>
+            {player == 'X' ? 'O' : 'X'} is the Winner!
+          </h1>
+          <button
+            className='border-2 m-8 p-4 cursor-pointer hover:bg-black hover:text-white hover:rounded-lg scale-105 ease-in-out duration-300'
+            onClick={clickRestart}
+          >
+            Restart
+          </button>
+        </>
+      )}
+      {!isOver && (
+        <>
+          {' '}
+          <div className='flex m-4 text-2xl'>
+            <h2 className='text-red-400'>{player}</h2>
+            <span>'s turn</span>
+          </div>
+        </>
+      )}
+
+      <table className='flex flex-col justify-between w-[700px] h-[700px]'>
+        <tr className='flex justify-between'>
           {boxes.slice(0, 3).map((item, idx) => (
             <td
               key={idx}
-              className='border-2 border-black text-center w-[8vw] h-[8vh] text-5xl'
+              className='flex justify-center items-center cursor-pointer hover:scale-110 focus:scale-110 ease-in-out duration-200 hover:rounded-2xl active:bg-black shadow-2xl border-2 border-black  w-[200px] h-[200px] text-5xl'
               onClick={() => (!isOver ? handleClick(idx) : {})}
             >
               {item}
             </td>
           ))}
         </tr>
-        <tr>
+        <tr className='flex justify-between'>
           {boxes.slice(3, 6).map((item, idx) => (
             <td
               key={idx + 3}
-              className='border-2 border-black text-center w-[8vw] h-[8vh] text-5xl'
+              className='flex justify-center items-center cursor-pointer hover:scale-110 focus:scale-110 ease-in-out duration-200 hover:rounded-2xl active:bg-black shadow-2xl border-2 border-black  w-[200px] h-[200px] text-5xl'
               onClick={() => (!isOver ? handleClick(idx + 3) : {})}
             >
               {item}
             </td>
           ))}
         </tr>
-        <tr>
+        <tr className='flex justify-between'>
           {boxes.slice(6, 9).map((item, idx) => (
             <td
               key={idx + 6}
-              className='border-2 border-black text-center w-[8vw] h-[8vh] text-5xl'
+              className='flex justify-center items-center cursor-pointer hover:scale-110 focus:scale-110 ease-in-out duration-200 hover:rounded-2xl active:bg-black shadow-2xl border-2 border-black  w-[200px] h-[200px] text-5xl'
               onClick={() => (!isOver ? handleClick(idx + 6) : {})}
             >
               {item}
@@ -89,11 +110,6 @@ export default function Home() {
           ))}{' '}
         </tr>
       </table>
-      <div className='flex '>
-        <h2 className='mr-2'>{player}'s </h2>
-        <span> turn</span>
-      </div>
-      <button onClick={clickRestart}>Restart</button>
     </div>
   );
 }
