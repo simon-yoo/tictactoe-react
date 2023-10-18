@@ -10,19 +10,9 @@ export default function Home() {
   //if game draw
   const [isDraw, setIsDraw] = useState(false);
 
-  const handleClick = (idx: number) => {
-    const newArray = [...boxes];
-    // if clicked on a not empty box do not change value
-    newArray[idx] = boxes[idx] === '' ? player : boxes[idx];
-    //if nothing changed do not change turn/values of the box
-    if (newArray.some((item, idx) => item !== boxes[idx])) {
-      setPlayer((prev) => (prev == 'O' ? 'X' : 'O'));
-      setBoxes(newArray);
-    }
-  };
-
-  const checkForWin = (symbol: string) => {
-    const winningSets = [
+  //Logic of the game
+  function checkWin(symbol: string, arr = boxes) {
+    const winningSet = [
       [0, 1, 2],
       [3, 4, 5],
       [6, 7, 8],
@@ -32,33 +22,33 @@ export default function Home() {
       [0, 4, 8],
       [2, 4, 6],
     ];
-
-    for (let set of winningSets) {
-      const [a, b, c] = set;
-      if (boxes[a] === symbol && boxes[b] === symbol && boxes[c] === symbol) {
+    let hasWon = false;
+    winningSet.forEach(([a, b, c]) => {
+      if (arr[a] == symbol && arr[b] == symbol && arr[c] == symbol) {
         setIsOver(true);
+        hasWon = true;
+        return;
       }
-    }
-  };
-
-  function checkDraw() {
-    let allFilled = true;
-    boxes.forEach((item) => {
-      if (item.length == 0) allFilled = false;
     });
-    if (!allFilled && !isOver) {
-      return false;
-    } else if (allFilled && !isOver) {
-      setIsDraw(true);
-      setIsOver(true);
-      return true;
-    }
+    return hasWon;
   }
 
-  useEffect(() => {
-    checkForWin(player === 'O' ? 'X' : 'O');
-    checkDraw();
-  }, [player]);
+  //handle click on each box
+  async function handleClick(idx: number) {
+    const newArr = [...boxes];
+    //if clicked on a not empty box do not change value
+    newArr[idx] = boxes[idx] === '' ? player : boxes[idx];
+    //if nothing changed do not change turn/values of the box
+    if (newArr.some((item, idx) => item !== boxes[idx])) {
+      const hasWon = checkWin(player, newArr);
+      if (newArr.every((item) => item.length > 0) && !hasWon) {
+        setIsOver(true);
+        setIsDraw(true);
+      }
+      setPlayer((pre) => (pre == 'X' ? 'O' : 'X'));
+      setBoxes(newArr);
+    }
+  }
 
   return (
     <div className='flex flex-col items-center h-full mb-12'>
