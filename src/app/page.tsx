@@ -7,6 +7,8 @@ export default function Home() {
   const [player, setPlayer] = useState<'O' | 'X'>('O');
   // If game is over
   const [isOver, setIsOver] = useState(false);
+  //if game draw
+  const [isDraw, setIsDraw] = useState(false);
 
   const handleClick = (idx: number) => {
     const newArray = [...boxes];
@@ -39,36 +41,58 @@ export default function Home() {
     }
   };
 
-  const clickRestart = () => {
-    const newArray = ['', '', '', '', '', '', '', '', ''];
-    setBoxes(newArray);
-    setIsOver(false);
-  };
+  function checkDraw() {
+    let allFilled = true;
+    boxes.forEach((item) => {
+      if (item.length == 0) allFilled = false;
+    });
+    if (!allFilled && !isOver) {
+      return false;
+    } else if (allFilled && !isOver) {
+      setIsDraw(true);
+      setIsOver(true);
+      return true;
+    }
+  }
 
   useEffect(() => {
     checkForWin(player === 'O' ? 'X' : 'O');
+    checkDraw();
   }, [player]);
 
   return (
     <div className='flex flex-col items-center h-full mb-12'>
       <h1 className='text-5xl font-bold m-6'>TICTACTOE</h1>
-      {isOver && (
-        <>
-          <h1 className='m-4 text-2xl font-semibold border-2 border-gray-400 py-4 px-8 shadow-2xl animate-bounce '>
-            {player == 'X' ? 'O' : 'X'} is the Winner!
-          </h1>
+
+      {(isOver || isDraw) && (
+        <div className='flex flex-col'>
+          {!isDraw && (
+            <h1 className='m-4 text-2xl font-semibold border-2 border-gray-400 py-4 px-8 shadow-2xl animate-bounce '>
+              {player == 'X' ? 'O' : 'X'} is the Winner!
+            </h1>
+          )}
+          {isDraw && (
+            <h1 className='m-4 text-2xl font-semibold border-2 border-gray-400 py-4 px-8 shadow-2xl animate-bounce '>
+              DRAW!!!
+            </h1>
+          )}
           <button
             className='border-2 m-8 p-4 cursor-pointer hover:bg-black hover:text-white hover:rounded-lg scale-105 ease-in-out duration-300'
-            onClick={clickRestart}
+            onClick={() => {
+              setBoxes(['', '', '', '', '', '', '', '', '']);
+              setIsOver(false);
+              setIsDraw(false);
+            }}
           >
             Restart
           </button>
-        </>
+        </div>
       )}
+
       {!isOver && (
         <>
           {' '}
-          <div className='flex m-4 text-2xl'>
+          <div className='flex m-12 text-2xl'>
             <h2 className='text-red-400'>{player}</h2>
             <span>'s turn</span>
           </div>
